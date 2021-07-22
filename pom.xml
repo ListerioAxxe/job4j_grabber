@@ -4,10 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>ru.job4j</groupId>
-  <artifactId>grabber</artifactId>
-  <version>1.0</version>
-  <packaging>jar</packaging>
+  <groupId>org.example</groupId>
+  <artifactId>job4j_grabber</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
   <properties>
     <maven.compiler.source>14</maven.compiler.source>
@@ -17,39 +16,21 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20210307</version>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-all</artifactId>
+      <version>1.3</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>42.2.16</version>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-      <version>2.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.activation</groupId>
-      <artifactId>activation</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jaxb</groupId>
-      <artifactId>jaxb-runtime</artifactId>
-      <version>2.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.8.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.30</version>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz</artifactId>
+      <version>2.3.2</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
@@ -57,14 +38,9 @@
       <version>1.2.17</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-all</artifactId>
-      <version>1.3</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.30</version>
     </dependency>
   </dependencies>
   <build>
@@ -72,35 +48,18 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.1.2</version>
-        <dependencies>
-          <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>8.42</version>
-          </dependency>
-          <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-          </dependency>
-          <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.30</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <configLocation>checkstyle.xml</configLocation>
-          <encoding>UTF-8</encoding>
-          <consoleOutput>true</consoleOutput>
-          <failsOnError>true</failsOnError>
-          <linkXRef>false</linkXRef>
-        </configuration>
+        <version>3.1.1</version>
         <executions>
           <execution>
             <id>validate</id>
             <phase>validate</phase>
+            <configuration>
+              <configLocation>checkstyle.xml</configLocation>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            </configuration>
             <goals>
               <goal>check</goal>
             </goals>
@@ -130,48 +89,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.2.0</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <finalName>duplicatesFinder</finalName>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>ru.job4j.io.duplicates.DuplicatesFinder</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <finalName>duplicatesFinder</finalName>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>ru.job4j.io.duplicates.DuplicatesFinder</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
