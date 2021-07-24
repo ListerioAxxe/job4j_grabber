@@ -18,7 +18,6 @@ public class AlertRabbit {
     private static Properties pr;
     private static int interval;
 
-
     private static void init() {
         try (var in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             pr = new Properties();
@@ -76,9 +75,11 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             System.out.println("Rabbit runs here ...");
-            Connection connection = (Connection) context.getJobDetail().getJobDataMap().get("connection");
+            Connection connection = (Connection) context.getJobDetail()
+                    .getJobDataMap().get("connection");
             try (Statement a = connection.createStatement()) {
-                String insertData = (String) context.getJobDetail().getJobDataMap().get("insertData");
+                String insertData = (String) context.getJobDetail()
+                        .getJobDataMap().get("insertData");
                 a.execute(insertData);
             } catch (Exception e) {
                 e.printStackTrace();
