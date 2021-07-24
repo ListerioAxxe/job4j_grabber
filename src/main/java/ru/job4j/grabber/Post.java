@@ -1,6 +1,7 @@
 package ru.job4j.grabber;
 
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.Objects;
 
 public class Post {
@@ -9,6 +10,13 @@ public class Post {
     private String link;
     private String description;
     private LocalDateTime created;
+
+    public Post(String link, String title, LocalDateTime created, String description) {
+        this.link = link;
+        this.title = title;
+        this.created = created;
+        this.description = description;
+    }
 
     public int getId() {
         return id;
