@@ -12,8 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SqlRuParse {
-    public static SqlRuDateTimeParser dateParser = new SqlRuDateTimeParser();
-    public static final Pattern DATE_PATTERN = Pattern.compile(".*, \\d{2}:\\d{2}");
+    private static SqlRuDateTimeParser dateParser = new SqlRuDateTimeParser();
+    private static final Pattern DATE_PATTERN = Pattern.compile(".*, \\d{2}:\\d{2}");
 
     public static Post parsePost(Element href) throws IOException {
         Document doc = Jsoup.connect(href.attr("href")).get();
@@ -30,7 +30,6 @@ public class SqlRuParse {
                 msgBody.text()
         );
     }
-
 
     public static void main(String[] args) throws Exception {
         Document doc = Jsoup.connect("https://www.sql.ru/forum/job-offers").get();
