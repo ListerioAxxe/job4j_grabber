@@ -4,6 +4,7 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Properties;
 
@@ -17,19 +18,17 @@ public class AlertRabbit {
     private static Properties pr;
     private static int interval;
 
-    private static void init() throws SQLException, ClassNotFoundException {
-        Class.forName(pr.getProperty("hibernate.connection.driver_class"));
-        String url = pr.getProperty("hibernate.connection.url");
-        String username = pr.getProperty("hibernate.connection.username");
-        String password = pr.getProperty("hibernate.connection.password");
-        cn = DriverManager.getConnection(url, username, password);
-        interval = Integer.parseInt(pr.getProperty("rabbit.interval"));
-    }
 
-    private static void prRead() {
+    private static void init() {
         try (var in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             pr = new Properties();
             pr.load(in);
+            Class.forName(pr.getProperty("hibernate.connection.driver_class"));
+            String url = pr.getProperty("hibernate.connection.url");
+            String username = pr.getProperty("hibernate.connection.username");
+            String password = pr.getProperty("hibernate.connection.password");
+            interval = Integer.parseInt(pr.getProperty("rabbit.interval"));
+            cn = DriverManager.getConnection(url, username, password);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -37,13 +36,16 @@ public class AlertRabbit {
 
     public static void main(String[] args) {
         try {
-            prRead();
-            createTable();
             init();
+            createTable();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
+            String insertData = (String.format("insert into rabbit(%s) values ('%s');",
+                    "created_date", Timestamp.valueOf(
+                            LocalDateTime.now().withNano(0))));
             JobDataMap data = new JobDataMap();
             data.put("connection", cn);
+            data.put("insertData", insertData);
             JobDetail job = newJob(Rabbit.class)
                     .usingJobData(data)
                     .build();
@@ -57,8 +59,8 @@ public class AlertRabbit {
             scheduler.scheduleJob(job, trigger);
             Thread.sleep(10000);
             scheduler.shutdown();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception se) {
+            se.printStackTrace();
         }
     }
 
@@ -74,11 +76,9 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             System.out.println("Rabbit runs here ...");
-            Connection connection = (Connection) context
-                    .getJobDetail().getJobDataMap().get("connection");
+            Connection connection = (Connection) context.getJobDetail().getJobDataMap().get("connection");
             try (Statement a = connection.createStatement()) {
-                String insertData = (String) context
-                        .getJobDetail().getJobDataMap().get("insertData");
+                String insertData = (String) context.getJobDetail().getJobDataMap().get("insertData");
                 a.execute(insertData);
             } catch (Exception e) {
                 e.printStackTrace();
