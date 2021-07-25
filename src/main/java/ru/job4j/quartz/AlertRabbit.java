@@ -29,19 +29,17 @@ public class AlertRabbit {
         }
     }
 
-    private static void createTable() throws SQLException, IOException, ClassNotFoundException {
+    private static void createTable(Connection cn) throws SQLException {
         String createTable = String.format("create table rabbit(%s);",
                 "created_date timestamp");
-        try (Connection cn = getConnection()) {
             try (PreparedStatement ps = cn.prepareStatement(createTable)) {
                 ps.execute();
             }
-        }
     }
 
     public static void main(String[] args) {
         try  (Connection cn = getConnection()) {
-            createTable();
+            createTable(cn);
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             String insertData = (String.format("insert into rabbit(%s) values ('%s');",
