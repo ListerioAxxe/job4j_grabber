@@ -3,22 +3,20 @@ package ru.job4j.quartz;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Properties;
-
 import static org.quartz.JobBuilder.*;
 import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
 
 public class AlertRabbit {
-
-    private static Connection cn;
     private static Properties pr;
     private static int interval;
 
-    private static void init() {
+    private static Connection getConnection()
+            throws IOException, SQLException, ClassNotFoundException {
         try (var in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             pr = new Properties();
             pr.load(in);
@@ -27,15 +25,22 @@ public class AlertRabbit {
             String username = pr.getProperty("hibernate.connection.username");
             String password = pr.getProperty("hibernate.connection.password");
             interval = Integer.parseInt(pr.getProperty("rabbit.interval"));
-            cn = DriverManager.getConnection(url, username, password);
-        } catch (Exception e) {
-            e.printStackTrace();
+            return DriverManager.getConnection(url, username, password);
+        }
+    }
+
+    private static void createTable() throws SQLException, IOException, ClassNotFoundException {
+        String createTable = String.format("create table rabbit(%s);",
+                "created_date timestamp");
+        try (Connection cn = getConnection()) {
+            try (PreparedStatement ps = cn.prepareStatement(createTable)) {
+                ps.execute();
+            }
         }
     }
 
     public static void main(String[] args) {
-        try {
-            init();
+        try  (Connection cn = getConnection()) {
             createTable();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
@@ -63,15 +68,8 @@ public class AlertRabbit {
         }
     }
 
-    private static void createTable() throws SQLException {
-        String createTable = String.format("create table rabbit(%s);",
-                "created_date timestamp");
-        try (PreparedStatement ps = cn.prepareStatement(createTable)) {
-            ps.execute();
-        }
-    }
-
     public static class Rabbit implements Job {
+
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             System.out.println("Rabbit runs here ...");
@@ -85,6 +83,5 @@ public class AlertRabbit {
                 e.printStackTrace();
             }
         }
-
     }
 }
