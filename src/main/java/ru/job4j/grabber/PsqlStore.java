@@ -11,6 +11,10 @@ public class PsqlStore implements Store, AutoCloseable {
     private static Properties cfg;
     private Connection cn;
 
+    public PsqlStore(Properties cfg) {
+        this.cfg = cfg;
+    }
+
     private static Connection getCon() throws SQLException, ClassNotFoundException {
         Class.forName(cfg.getProperty("driver_class"));
         String url = cfg.getProperty("url");
@@ -97,7 +101,7 @@ public class PsqlStore implements Store, AutoCloseable {
             e.printStackTrace();
         }
         try (Connection cn = getCon()) {
-            PsqlStore psqlStore = new PsqlStore();
+            PsqlStore psqlStore = new PsqlStore(cfg);
             LocalDateTime lc = LocalDateTime.now();
             psqlStore.save(new Post("4", "5", lc, "7"));
             LocalDateTime lc2 = LocalDateTime.now();
