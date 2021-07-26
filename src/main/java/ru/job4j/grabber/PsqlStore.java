@@ -8,19 +8,19 @@ import java.util.List;
 import java.util.Properties;
 
 public class PsqlStore implements Store, AutoCloseable {
-    private static Properties cfg;
     private Connection cn;
 
-    public PsqlStore(Properties cfg) {
-        this.cfg = cfg;
-    }
-
-    private static Connection getCon() throws SQLException, ClassNotFoundException {
-        Class.forName(cfg.getProperty("driver_class"));
-        String url = cfg.getProperty("url");
-        String user = cfg.getProperty("username");
-        String password = cfg.getProperty("password");
-        return DriverManager.getConnection(url, user, password);
+    public PsqlStore(Properties cfg) throws SQLException {
+        try {
+            Class.forName(cfg.getProperty("jdbc.driver"));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        cn = DriverManager.getConnection(cfg.getProperty("url"),
+                cfg.getProperty("user"),
+                cfg.getProperty("password")
+                );
+        creatingTable();
     }
 
     private void creatingTable() {
@@ -100,8 +100,7 @@ public class PsqlStore implements Store, AutoCloseable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        try (Connection cn = getCon()) {
-            PsqlStore psqlStore = new PsqlStore(cfg);
+            PsqlStore psqlStore = new PsqlStore(properties);
             LocalDateTime lc = LocalDateTime.now();
             psqlStore.save(new Post("4", "5", lc, "7"));
             LocalDateTime lc2 = LocalDateTime.now();
@@ -109,7 +108,6 @@ public class PsqlStore implements Store, AutoCloseable {
             System.out.println(psqlStore.getAll());
             System.out.println(psqlStore.findById(2));
         }
-    }
 
     @Override
     public void close() throws Exception {
