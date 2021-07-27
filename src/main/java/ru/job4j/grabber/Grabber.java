@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,7 +19,7 @@ public class Grabber implements Grab {
     private static SqlRuDateTimeParser dateParser;
     private final Properties cfg = new Properties();
 
-    public Store store() {
+    public Store store() throws SQLException {
         return new PsqlStore(cfg);
     }
 
@@ -83,12 +84,14 @@ public class Grabber implements Grab {
             Parse parse = (Parse) map.get("parse");
             List<Post> posts;
             try {
-                posts = parse.list("https://www.sql.ru/forum/job-offers");
+                for (int i = 1; i <= 5; i++) {
+                    posts = parse.list(String.format("%s,%d", "https://www.sql.ru/forum/job-offers", i));
+                    for (Post post : posts) {
+                        store.save(post);
+                    }
+                }
             } catch (IOException e) {
                 throw new JobExecutionException("Error downloading information", e);
-            }
-            for (Post post : posts) {
-                store.save(post);
             }
         }
     }
