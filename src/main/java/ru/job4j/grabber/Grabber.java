@@ -85,7 +85,8 @@ public class Grabber implements Grab {
             List<Post> posts;
             try {
                 for (int i = 1; i <= 5; i++) {
-                    posts = parse.list(String.format("%s,%d", "https://www.sql.ru/forum/job-offers", i));
+                    posts = parse.list(String.format("%s,%d",
+                            "https://www.sql.ru/forum/job-offers", i));
                     for (Post post : posts) {
                         store.save(post);
                     }

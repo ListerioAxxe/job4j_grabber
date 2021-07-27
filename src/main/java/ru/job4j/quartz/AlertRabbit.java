@@ -14,8 +14,13 @@ import static org.quartz.SimpleScheduleBuilder.*;
 public class AlertRabbit {
     private static Properties pr;
     private static int interval;
+    private static Connection cn;
 
-    private static Connection getConnection()
+    public AlertRabbit() throws SQLException, IOException, ClassNotFoundException {
+        getConnection();
+    }
+
+    private void  getConnection()
             throws IOException, SQLException, ClassNotFoundException {
         try (var in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
             pr = new Properties();
@@ -25,11 +30,13 @@ public class AlertRabbit {
             String username = pr.getProperty("hibernate.connection.username");
             String password = pr.getProperty("hibernate.connection.password");
             interval = Integer.parseInt(pr.getProperty("rabbit.interval"));
-            return DriverManager.getConnection(url, username, password);
+            try (Connection cn = DriverManager.getConnection(url, username, password)) {
+                this.cn = cn;
+            }
         }
     }
 
-    private static void createTable(Connection cn) throws SQLException {
+    private static void createTable() throws SQLException {
         String createTable = String.format("create table rabbit(%s);",
                 "created_date timestamp");
             try (PreparedStatement ps = cn.prepareStatement(createTable)) {
@@ -37,9 +44,11 @@ public class AlertRabbit {
             }
     }
 
-    public static void main(String[] args) {
-        try  (Connection cn = getConnection()) {
-            createTable(cn);
+    public static void main(String[] args)
+            throws SQLException, IOException, ClassNotFoundException {
+        new AlertRabbit();
+         try {
+            createTable();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             String insertData = (String.format("insert into rabbit(%s) values ('%s');",
